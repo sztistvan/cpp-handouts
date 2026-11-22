@@ -1,0 +1,8 @@
+add_example(tour tour.cpp)
+add_example(read_measurements read_measurements.cpp)
+add_example(logistic_csv logistic_csv.cpp)
+add_example(maze_from_file maze_from_file.cpp)
+add_example(classify_file classify_file.cpp)
+add_example(fasta_reader fasta_reader.cpp)
+add_example(log_parser log_parser.cpp)
+add_example(simulation_params simulation_params.cpp)

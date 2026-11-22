@@ -2,7 +2,7 @@
 
 Short explanations of terms that appear in the handouts. Entries are alphabetical. Each has a plain definition, a small example and a pointer to where the term is used. The outputs shown were produced with g++ 13.1 (MinGW).
 
-**Contents:** [Bounds checking](#bounds-checking) · [Buffer overflow](#buffer-overflow) · [Compile time and run time](#compile-time-and-run-time) · [Compiler warning and error](#compiler-warning-and-error) · [Container](#container) · [Convergence](#convergence) · [Copy and reference](#copy-and-reference) · [Declaration and definition](#declaration-and-definition) · [Default argument](#default-argument) · [Deterministic chaos and bifurcation](#deterministic-chaos-and-bifurcation) · [Exit code](#exit-code) · [Floating-point number](#floating-point-number) · [Function signature](#function-signature) · [Implicit conversion, cast, narrowing](#implicit-conversion-cast-narrowing) · [Integer division](#integer-division) · [Iteration](#iteration) · [Literal](#literal) · [Magic number](#magic-number) · [NaN and infinity](#nan-and-infinity) · [npos](#npos) · [Off-by-one error](#off-by-one-error) · [Overflow](#overflow) · [Overloading](#overloading) · [Parallel vectors](#parallel-vectors) · [Pass by value, by reference, by const reference](#pass-by-value-by-reference-by-const-reference) · [Range-based for loop](#range-based-for-loop) · [Scope](#scope) · [Sentinel value](#sentinel-value) · [size_t and unsigned numbers](#size_t-and-unsigned-numbers) · [Stack overflow](#stack-overflow) · [Stream and flush](#stream-and-flush) · [Time complexity](#time-complexity) · [Tolerance](#tolerance) · [Truncation (discretization) error](#truncation-discretization-error) · [Undefined behavior](#undefined-behavior) · [Uninitialized variable](#uninitialized-variable) · [Vector](#vector)
+**Contents:** [Bounds checking](#bounds-checking) · [Buffer overflow](#buffer-overflow) · [Compile time and run time](#compile-time-and-run-time) · [Compiler warning and error](#compiler-warning-and-error) · [Container](#container) · [Convergence](#convergence) · [Copy and reference](#copy-and-reference) · [Declaration and definition](#declaration-and-definition) · [Default argument](#default-argument) · [Deterministic chaos and bifurcation](#deterministic-chaos-and-bifurcation) · [Exit code](#exit-code) · [File stream](#file-stream) · [Floating-point number](#floating-point-number) · [Function signature](#function-signature) · [Implicit conversion, cast, narrowing](#implicit-conversion-cast-narrowing) · [Integer division](#integer-division) · [Iteration](#iteration) · [Line endings](#line-endings) · [Literal](#literal) · [Magic number](#magic-number) · [NaN and infinity](#nan-and-infinity) · [npos](#npos) · [Off-by-one error](#off-by-one-error) · [Overflow](#overflow) · [Overloading](#overloading) · [Parallel vectors](#parallel-vectors) · [Pass by value, by reference, by const reference](#pass-by-value-by-reference-by-const-reference) · [Preprocessor macro](#preprocessor-macro) · [Range-based for loop](#range-based-for-loop) · [Scope](#scope) · [Sentinel value](#sentinel-value) · [size_t and unsigned numbers](#size_t-and-unsigned-numbers) · [Stack overflow](#stack-overflow) · [Stream and flush](#stream-and-flush) · [Stream state](#stream-state) · [String stream](#string-stream) · [Text and binary mode](#text-and-binary-mode) · [Time complexity](#time-complexity) · [Tolerance](#tolerance) · [Truncation (discretization) error](#truncation-discretization-error) · [Undefined behavior](#undefined-behavior) · [Uninitialized variable](#uninitialized-variable) · [Vector](#vector) · [Working directory](#working-directory)
 
 ---
 
@@ -208,6 +208,28 @@ $LASTEXITCODE
 
 ---
 
+## File stream
+
+**What:** `std::ifstream` (input) and `std::ofstream` (output) from the header `<fstream>` connect a program to a file. They are used exactly like `std::cin` and `std::cout`: `>>` and `std::getline` read, `<<` writes, and the formatting tools (`std::fixed`, `std::setw`, ...) work the same way. The file is closed automatically when the variable goes out of scope, or earlier with `close()`.
+
+**Example:**
+
+```cpp
+std::ofstream out("results.csv");     // opens for writing
+out << "generation,population\n";
+out << 0 << ',' << 10.0 << '\n';
+
+std::ifstream in("results.csv");      // opens for reading
+std::string line;
+while (std::getline(in, line)) { /* use line */ }
+```
+
+**Why it matters:** opening a file for writing **erases** an existing file with that name, without asking (tested: an existing three-line file had 0 lines afterwards). To add to the end instead, open with `std::ofstream out(path, std::ios::app)`. Opening can fail (wrong path, no permission, file locked by another program), so check the [stream state](#stream-state) right after opening.
+
+**See also:** [Stream state](#stream-state), [Stream and flush](#stream-and-flush), [Working directory](#working-directory). Used in [Handout 5, sections 1.1 and 1.2](../handouts/05-files.md).
+
+---
+
 ## Floating-point number
 
 **What:** the way computers store decimal numbers (`double`, `float`): a limited number of significant digits, stored in binary. A `double` carries about 15 decimal digits.
@@ -291,6 +313,25 @@ double d = static_cast<double>(7) / 2;  // 3.5: explicit and visible
 **Why it matters:** counting iterations measures the work and shows the [convergence](#convergence). A loop whose condition never becomes false iterates forever, so give iterative methods a maximum number of iterations.
 
 **See also:** [Convergence](#convergence), [Tolerance](#tolerance). Used in [Handout 2, section 1.4](../handouts/02-basics.md) and [Handout 3, section 6.3](../handouts/03-functions.md).
+
+---
+
+## Line endings
+
+**What:** the character or characters that end a line in a text file. Linux and macOS use `\n`, Windows uses `\r\n` (two characters). A file that travels between systems can therefore carry an extra `\r` at the end of every line.
+
+**Example:** a file made on Windows is read in two ways (tested on Windows):
+
+```text
+text mode:   first line "a"    has length 1
+binary mode: first line "a\r"  has length 2
+```
+
+The text `"98.2\r"` is not a number for a strict conversion, and `"S01,control\r"` is not equal to `"S01,control"`.
+
+**Why it matters:** an invisible `\r` makes comparisons and number conversions fail in a way that is hard to see on the screen. The examples therefore remove it from every line they read: `if (!line.empty() && line.back() == '\r') line.pop_back();`.
+
+**See also:** [Text and binary mode](#text-and-binary-mode), [File stream](#file-stream). Used in [Handout 5, section 1.2](../handouts/05-files.md).
 
 ---
 
@@ -483,6 +524,26 @@ increment(counter);        // counter is now 11
 
 ---
 
+## Preprocessor macro
+
+**What:** a name that the *preprocessor* replaces by text before the compiler starts. It is created with `#define NAME value` in the source, or from outside through the build system (`-DNAME=value`; in CMake `target_compile_definitions`). A macro has no type and no scope: it is plain text substitution.
+
+**Example:** the examples of handout 5 get the folder of their input files from CMake:
+
+```cpp
+#ifndef DATA_DIR            // not defined by the build system?
+#define DATA_DIR "data"     // then use this default
+#endif
+
+std::string path = std::string(DATA_DIR) + "/maze.txt";
+```
+
+**Why it matters:** because a macro is only text, mistakes in it give confusing messages, and it ignores the rules of types and scopes. For constants prefer `const double rate = 0.3;`, and for calculations use functions. A macro is justified where a value must come from **outside the source code**, such as a path chosen by the build system, or where a program must be built in different ways.
+
+**See also:** [Compile time and run time](#compile-time-and-run-time). Used in [Handout 5, section 0](../handouts/05-files.md); the preprocessor step is shown in [Handout 1, section 3](../handouts/01-hello.md).
+
+---
+
 ## Range-based for loop
 
 **What:** a loop that visits every element of a [container](#container) in order: `for (type name : container)`. It has no index, so it cannot have an [off-by-one error](#off-by-one-error).
@@ -596,6 +657,70 @@ std::cout << "result" << std::endl;  // flushes every time: slow for many lines
 
 ---
 
+## Stream state
+
+**What:** every stream remembers whether its last operation worked. `stream.fail()` (and `!stream`) is true after a failed opening or a failed read, `stream.eof()` is true after a read hit the end of the input. After a failure, further reads do nothing until the state is reset with `clear()`.
+
+**Example:**
+
+```cpp
+std::ifstream in(path);
+if (!in) { /* the file could not be opened */ }
+
+while (std::getline(in, line)) { /* runs while reading works */ }   // correct
+
+while (!in.eof()) { std::getline(in, line); /* ... */ }            // wrong
+```
+
+The wrong loop ran **four** times on a file with three lines: `eof()` becomes true only after a read has already failed, so the last round works on an empty line (tested).
+
+Conversions have a state too: `stream >> value` fails for `abc`, but succeeds for `12abc` and reads 12, leaving `abc` behind. A strict conversion therefore also checks that the whole text was used.
+
+**Why it matters:** a failed stream does not stop the program. If you ignore the state, the program carries on with nothing and may produce nonsense without any message. Test the state after opening and after conversions, and report the file name and line number.
+
+**See also:** [File stream](#file-stream), [String stream](#string-stream), [Compile time and run time](#compile-time-and-run-time). Used in [Handout 5, sections 1.2, 1.3 and 1.5](../handouts/05-files.md).
+
+---
+
+## String stream
+
+**What:** `std::istringstream` (header `<sstream>`) makes a string behave like an input file, and `std::ostringstream` collects output into a string. With `std::getline(stream, field, ',')` an `istringstream` is the usual tool to cut a line at a delimiter.
+
+**Example:**
+
+```cpp
+std::istringstream stream("S01,control,98.2");
+std::string field;
+while (std::getline(stream, field, ',')) {
+    std::cout << '[' << field << "] ";    // [S01] [control] [98.2]
+}
+```
+
+**Why it matters:** it allows you to use all stream tools on text that is already in memory. One limit: this way of splitting drops an empty field at the **end** of a line (`"a,b,"` gives two fields, tested), keeps one in the middle (`"a,,c"` gives three), and knows nothing about quoted fields. Always check the number of fields you expect.
+
+**See also:** [Stream state](#stream-state), [File stream](#file-stream). Used in [Handout 5, sections 1.4 and 1.5](../handouts/05-files.md).
+
+---
+
+## Text and binary mode
+
+**What:** a file stream can be opened in *text mode* (the default) or in *binary mode* (`std::ios::binary`). In text mode the system may translate line endings (on Windows `\r\n` becomes `\n` when reading). In binary mode the bytes arrive unchanged.
+
+**Example:**
+
+```cpp
+std::ifstream text_in(path);                       // text mode
+std::ifstream binary_in(path, std::ios::binary);   // binary mode
+```
+
+For a Windows file with the lines `a`, `b`, `c`, the first line has length 1 when read in text mode and length 2 (`"a\r"`) in binary mode (tested on Windows).
+
+**Why it matters:** use text mode for text files such as CSV, FASTA and logs. Use binary mode for data that is not text, where no translation may happen. The same program can behave differently on different systems, which is why the examples also remove a trailing `\r` themselves.
+
+**See also:** [Line endings](#line-endings), [File stream](#file-stream). Used in [Handout 5, section 1.2](../handouts/05-files.md).
+
+---
+
 ## Time complexity
 
 **What:** a statement about how the amount of work grows with the size of the input, ignoring constant factors. It is written with a capital O: `O(n)` means the work grows in proportion to the input size `n`.
@@ -698,3 +823,15 @@ std::vector<int> zeros(5, 0);    // five elements, all 0
 **Why it matters:** `std::vector` is the default [container](#container) and replaces C arrays in almost all code: no separate count, no fixed size, and growing is cheap on average. One exception: `std::vector<bool>` behaves differently from all other vectors, so keep yes/no flags in a `std::vector<int>` instead.
 
 **See also:** [Container](#container), [Bounds checking](#bounds-checking), [Range-based for loop](#range-based-for-loop), [size_t and unsigned numbers](#size_t-and-unsigned-numbers), [Copy and reference](#copy-and-reference). Used in [Handout 4](../handouts/04-vectors.md).
+
+---
+
+## Working directory
+
+**What:** the folder a program was started from. A *relative* file name such as `"maze.txt"` is looked up there. A full (absolute) path does not depend on it.
+
+**Example:** the same program started from a terminal in the repository root, from Qt Creator and from VSCode may have three different working directories. It opens `maze.txt` in one place and reports "cannot open" in another, although nothing in the program changed.
+
+**Why it matters:** this is the most frequent reason why reading a file fails. The examples avoid it by getting the input folder from the build system (see [Preprocessor macro](#preprocessor-macro)) instead of relying on the working directory. Whenever a file cannot be opened, print the path that was used. Forward slashes (`"data/maze.txt"`) work on Windows too, and avoid the problem that a backslash in a C++ text starts an escape sequence (`"\n"` is a newline).
+
+**See also:** [File stream](#file-stream), [Stream state](#stream-state). Used in [Handout 5, section 0](../handouts/05-files.md).

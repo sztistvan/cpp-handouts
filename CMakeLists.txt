@@ -19,7 +19,13 @@ function(add_example name source)
   string(REGEX MATCH "^[0-9]+" nn "${folder}")
   add_executable(${nn}_${name} ${source})
   set_target_properties(${nn}_${name} PROPERTIES OUTPUT_NAME ${name})
+  # Where programs find their input files and where they write result files.
+  target_compile_definitions(${nn}_${name} PRIVATE
+    DATA_DIR="${CMAKE_SOURCE_DIR}/data"
+    OUTPUT_DIR="${CMAKE_BINARY_DIR}/output")
 endfunction()
+
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 
 # Every folder under examples/ that contains a CMakeLists.txt is added automatically.
 file(GLOB example_dirs LIST_DIRECTORIES true RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/examples

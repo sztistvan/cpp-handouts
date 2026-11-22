@@ -9,6 +9,7 @@ pictures cannot drift apart. The PNG files are committed, so nobody needs Python
 just to read the handouts.
 """
 import argparse
+import csv
 import re
 import subprocess
 import sys
@@ -218,6 +219,30 @@ def logistic_growth_rate(exe_dir: Path) -> None:
     plt.close(fig)
 
 
+def logistic_from_csv(exe_dir: Path, build_dir: Path) -> None:
+    """The C++ program writes logistic.csv. This function reads the FILE (not the console output)."""
+    run(exe_dir / "logistic_csv.exe")  # writes build/.../output/logistic.csv
+    path = build_dir / "output" / "logistic.csv"
+    with open(path, newline="") as f:
+        reader = csv.reader(f)
+        header = next(reader)
+        rows = [[float(x) for x in row] for row in reader]
+    gens = [row[0] for row in rows]
+
+    fig, ax = plt.subplots(figsize=(6, 3.6))
+    colors = [BLUE, ORANGE, "#009e73"]
+    for k in range(1, len(header)):
+        ax.plot(gens, [row[k] for row in rows], marker="o", markersize=3, color=colors[k - 1],
+                label=header[k].replace("_", " = "))
+    ax.axhline(1000, color=GREY, linestyle="--", linewidth=1)
+    ax.set_xlabel("generation t")
+    ax.set_ylabel("population N")
+    ax.set_title("Read from logistic.csv: three growth rates")
+    ax.legend(frameon=False, loc="lower right")
+    fig.savefig(OUT / "05_logistic_csv.png")
+    plt.close(fig)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--build-dir", default="build/mingw-debug",
@@ -232,6 +257,7 @@ def main() -> None:
     trapezoid_error(examples / "03-functions")
     measurements(examples / "04-vectors")
     logistic_growth_rate(examples / "04-vectors")
+    logistic_from_csv(examples / "05-files", ROOT / args.build_dir)
     print("Figures written to", OUT)
 
 

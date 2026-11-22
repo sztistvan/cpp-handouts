@@ -1,0 +1,6 @@
+# Parameters of the logistic growth simulation
+r = 0.4
+capacity = 1000
+start = 10
+
+generations = 25

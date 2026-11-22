@@ -1,0 +1,13 @@
+sample,group,rate
+S01,control,98.2
+S02,control,101.5
+S03,control,99.8
+S04,control,103.1
+S05,treated,112.4
+S06,treated,115.0
+S07,treated,
+S08,treated,118.7
+S09,treated,n/a
+S10,control,97.6
+S11,treated,99,4
+S12,treated,121.3
