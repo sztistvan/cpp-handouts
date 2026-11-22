@@ -1,6 +1,6 @@
 # C++ for Researchers and Engineers
 
-Handouts with fully solved, runnable examples that teach C++ to people who are not programmers but work in biology, chemistry, mathematics or engineering. The students are clever, know the basics of programming (variables, `if`/`else`, loops) from another language, and need C++ in their research or engineering work.
+Handouts with fully solved, runnable examples that teach C++ to people who are not programmers but work in biology, chemistry, mathematics or engineering. The handouts assume only basic programming knowledge (variables, `if`/`else`, loops) from another language, and are written for readers who need C++ in their research or engineering work.
 
 - **Solved examples, not exercises.** Every handout works through real problems (population growth, enzyme kinetics, sequence analysis, search, simulation, statistics, classification) with complete code, real output and an explanation.
 - **Same problem, new tool.** A few problems return in later handouts, solved with the tool of that handout, so you can see what each new feature makes easier.
