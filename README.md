@@ -11,24 +11,28 @@ Handouts with fully solved, runnable examples that teach C++ to people who are n
 
 Each handout is designed for about 60 minutes. *Core* examples fit the session, *Extra* examples are for self-study.
 
-| # | Topic | Status |
-|---|---|---|
-| 1 | [Hello, C++](handouts/01-hello.md): program anatomy, compile and run, formatted output, reading compiler errors | available |
-| 2 | [The basics in a nutshell](handouts/02-basics.md): types, operators, conditions, loops, arrays. Logistic growth, linear search | available |
-| 3 | [Functions, references, `const`](handouts/03-functions.md): Michaelis-Menten kinetics, numerical integration, binary search | available |
-| 4 | `vector`, `string`, range-`for` | planned |
-| 5 | Files and CSV | planned |
-| 6 | `map`, `set`, STL algorithms | planned |
-| 7 | Numerics | planned |
-| 8 | Randomness, Monte Carlo, statistical tests | planned |
-| 9 | Classes and encapsulation | planned |
-| 10 | Inheritance, polymorphism, capstone | planned |
+The middle column lists the **C++ concepts** a handout teaches. The last column lists the **examples** (applications) that use them.
+
+| # | Handout | C++ concepts | Examples | Status |
+|---|---|---|---|---|
+| 1 | [Hello, C++](handouts/01-hello.md) | program structure, `#include`, namespace `std`, `main` and its return value, streams (`cout`, `cin`, `cerr`), output formatting, compile and link, reading compiler errors | element table, molar mass of water, reading a name and numbers, table of squares and roots | available |
+| 2 | [The basics](handouts/02-basics.md) | types and variables, initialisation, `const`, operators, integer division, conditions, loops, fixed-size arrays | logistic growth (with chaos), linear search, Fibonacci rabbits, half-life, Collatz | available |
+| 3 | [Functions](handouts/03-functions.md) | declaration and definition, parameters and return values, pass by value / reference / `const` reference, default arguments, overloading, scope | Michaelis-Menten kinetics, trapezoid integration, binary search, area under a concentration curve, pH, Newton's method, ideal gas law | available |
+| 4 | Vectors and strings | `std::vector`, `std::string`, range-`for`, size and indexing, `at()` | statistics of measurements (mean, SD, median), GC content, reverse complement, restriction sites, moving average, grid as 2D vector, counting TP/TN/FP/FN and accuracy | planned |
+| 5 | Files | file streams (`ifstream`, `ofstream`), reading line by line, splitting text, checking stream state | CSV measurements, simulation output for plotting, maze from file, predictions file with precision / recall / F1, FASTA reader | planned |
+| 6 | Containers and algorithms | `std::map`, `std::set`, `std::queue`, `std::priority_queue`, `struct` as a record, `std::sort` and other algorithms, lambda basics | k-mer counting, breadth-first search, Dijkstra, word and codon frequencies, sorting records, shortest path in a metabolic network | planned |
+| 7 | Numerical methods in C++ | floating-point behavior in practice, `<cmath>`, passing a function to a function (lambda, `std::function`) | float pitfalls, Euler vs. RK4 for a decay chain, bisection and Newton root finding, Lotka-Volterra and SIR models, ROC curve and AUC, gradient descent | planned |
+| 8 | Random numbers | `<random>` (engines, distributions, seeding, reproducibility), repeated experiments in loops | estimating π, random walk and diffusion, bootstrap confidence interval, permutation test, t-test and chi-square test, Gillespie simulation, train/test split | planned |
+| 9 | Classes | `class` vs. `struct`, encapsulation (`private` / `public`), constructors, member functions, `const` member functions, operator overloading | molecule and molar mass, particles in a box, `Model` class, `Grid` and `Node`, `ConfusionMatrix`, `Vec3` | planned |
+| 10 | Inheritance and polymorphism | inheritance, `virtual` functions and abstract classes, composition vs. inheritance, smart pointers (just enough), templates (a glimpse) | one ODE solver for several models, A* search with a choice of heuristic, `Classifier` interface, small neural network, capstone (heat diffusion or Game of Life) | planned |
 
 Side material: [glossary](notes/glossary.md). More notes (pointers, floating-point pitfalls, templates, advanced object-oriented topics) are planned.
 
 ## Quick start
 
-Install a toolchain and an IDE first: see [setup/qtcreator.md](setup/qtcreator.md) or [setup/vscode.md](setup/vscode.md). Both use the compiler (MinGW), CMake and Ninja from the Qt installer.
+Get the files first: see [setup/get-the-repository.md](setup/get-the-repository.md). A ZIP download is enough, Git is not required.
+
+Then install a toolchain and an IDE: see [setup/qtcreator.md](setup/qtcreator.md) or [setup/vscode.md](setup/vscode.md). Both use the compiler (MinGW), CMake and Ninja from the Qt installer.
 
 Then, from the repository root:
 
@@ -65,4 +69,6 @@ Windows 11, g++ 13.1 (MinGW-Builds, via Qt installer), CMake 3.30, Ninja 1.12, Q
 
 ## License
 
-[MIT](LICENSE)
+Released under the [MIT License](LICENSE). Copyright (c) 2026 István Szatmári.
+
+These handouts are personal teaching material. You are welcome to use, adapt and share them, including in your own courses.
