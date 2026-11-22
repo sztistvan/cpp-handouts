@@ -112,16 +112,72 @@ def logistic_bifurcation(exe_dir: Path) -> None:
     plt.close(fig)
 
 
+def michaelis_menten(exe_dir: Path) -> None:
+    text = run(exe_dir / "michaelis_menten.exe")
+    s_values, v_values = [], []
+    for line in text.splitlines()[1:]:
+        parts = line.split()
+        if len(parts) != 3:  # the table ends at the first blank line
+            break
+        s_values.append(float(parts[0]))
+        v_values.append(float(parts[1]))
+
+    vmax, km = 100.0, 2.5  # the parameters used in the program
+    curve_s = [0.05 * 1.05 ** k for k in range(0, 160)]
+    curve_v = [vmax * s / (km + s) for s in curve_s]
+
+    fig, ax = plt.subplots(figsize=(6, 3.6))
+    ax.plot(curve_s, curve_v, color=BLUE, linewidth=1.5, label="formula")
+    ax.plot(s_values, v_values, "o", color=ORANGE, markersize=5, label="program output")
+    ax.axhline(vmax, color=GREY, linestyle="--", linewidth=1)
+    ax.text(0.07, vmax + 2, "Vmax = 100", color=GREY, fontsize=9)
+    ax.plot([km, km], [0, vmax / 2], color=GREY, linestyle=":", linewidth=1)
+    ax.plot([0.05, km], [vmax / 2, vmax / 2], color=GREY, linestyle=":", linewidth=1)
+    ax.text(km * 1.08, 6, "Km = 2.5 mM", color=GREY, fontsize=9)
+    ax.set_xscale("log")
+    ax.set_xlabel("substrate concentration S (mM, log scale)")
+    ax.set_ylabel("rate v (umol/min)")
+    ax.set_title("Michaelis-Menten kinetics")
+    ax.set_ylim(0, 112)
+    ax.legend(loc="center right", bbox_to_anchor=(1.0, 0.38), frameon=False)
+    fig.savefig(OUT / "03_michaelis_menten.png")
+    plt.close(fig)
+
+
+def trapezoid_error(exe_dir: Path) -> None:
+    text = run(exe_dir / "trapezoid.exe")
+    ns, errors = [], []
+    for line in text.splitlines():
+        parts = line.split()
+        if len(parts) == 4 and parts[0].isdigit():
+            ns.append(int(parts[0]))
+            errors.append(float(parts[2]))
+
+    reference = [errors[0] * (ns[0] / n) ** 2 for n in ns]  # a line with slope -2
+    fig, ax = plt.subplots(figsize=(6, 3.6))
+    ax.loglog(ns, errors, "o-", color=BLUE, label="trapezoid rule (program output)")
+    ax.loglog(ns, reference, "--", color=GREY, label="error shrinks like 1/n²")
+    ax.set_xlabel("number of strips n")
+    ax.set_ylabel("absolute error (mg·h/L)")
+    ax.set_title("Doubling n divides the error by 4")
+    ax.legend(frameon=False)
+    ax.grid(True, which="both", alpha=0.2)
+    fig.savefig(OUT / "03_trapezoid_error.png")
+    plt.close(fig)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--build-dir", default="build/mingw-debug",
                         help="CMake build directory (default: build/mingw-debug)")
     args = parser.parse_args()
-    exe_dir = ROOT / args.build_dir / "examples" / "02-basics"
+    examples = ROOT / args.build_dir / "examples"
 
-    logistic_growth(exe_dir)
-    logistic_rates(exe_dir)
-    logistic_bifurcation(exe_dir)
+    logistic_growth(examples / "02-basics")
+    logistic_rates(examples / "02-basics")
+    logistic_bifurcation(examples / "02-basics")
+    michaelis_menten(examples / "03-functions")
+    trapezoid_error(examples / "03-functions")
     print("Figures written to", OUT)
 
 

@@ -15,7 +15,7 @@ Each handout is designed for about 60 minutes. *Core* examples fit the session, 
 |---|---|---|
 | 1 | [Hello, C++](handouts/01-hello.md): program anatomy, compile and run, formatted output, reading compiler errors | available |
 | 2 | [The basics in a nutshell](handouts/02-basics.md): types, operators, conditions, loops, arrays. Logistic growth, linear search | available |
-| 3 | Functions, references, `const` | planned |
+| 3 | [Functions, references, `const`](handouts/03-functions.md): Michaelis-Menten kinetics, numerical integration, binary search | available |
 | 4 | `vector`, `string`, range-`for` | planned |
 | 5 | Files and CSV | planned |
 | 6 | `map`, `set`, STL algorithms | planned |

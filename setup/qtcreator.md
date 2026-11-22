@@ -27,7 +27,7 @@ The download is large and can be slow on university or company networks. Be pati
 
 | What | How |
 |---|---|
-| Choose the program to run | Click the **kit/target selector** (computer icon, bottom left) and choose the target, e.g. `hello_world` |
+| Choose the program to run | Click the **kit/target selector** (computer icon, bottom left) and choose the target, e.g. `01_hello_world` (targets are named `<handout number>_<program>`, the program file itself is `hello_world.exe`) |
 | Build | Hammer icon, or `Ctrl+B` |
 | Build and run | Green **▶** (`Ctrl+R`) |
 | Debug | Green **▶ with bug** (`F5`). Click left of a line number to set a breakpoint first |

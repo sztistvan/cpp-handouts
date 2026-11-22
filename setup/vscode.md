@@ -37,7 +37,7 @@ All controls are in the **blue status bar** at the bottom of the window:
 
 | What | How |
 |---|---|
-| Choose the program to run | Click the target name in the status bar (it may show `[all]`) and choose e.g. `hello_world` |
+| Choose the program to run | Click the target name in the status bar (it may show `[all]`) and choose e.g. `01_hello_world` (targets are named `<handout number>_<program>`, the program file itself is `hello_world.exe`) |
 | Build | **Build** button in the status bar, or `F7` |
 | Run | **▶** icon in the status bar |
 | Debug | **bug** icon next to ▶. Click left of a line number to set a breakpoint first |

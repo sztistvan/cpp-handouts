@@ -2,7 +2,7 @@
 
 Short explanations of terms that appear in the handouts. Entries are alphabetical. Each has a plain definition, a small example and a pointer to where the term is used. The outputs shown were produced with g++ 13.1 (MinGW).
 
-**Contents:** [Bounds checking](#bounds-checking) · [Buffer overflow](#buffer-overflow) · [Compile time and run time](#compile-time-and-run-time) · [Compiler warning and error](#compiler-warning-and-error) · [Deterministic chaos and bifurcation](#deterministic-chaos-and-bifurcation) · [Exit code](#exit-code) · [Floating-point number](#floating-point-number) · [Implicit conversion, cast, narrowing](#implicit-conversion-cast-narrowing) · [Integer division](#integer-division) · [Literal](#literal) · [Magic number](#magic-number) · [NaN and infinity](#nan-and-infinity) · [Off-by-one error](#off-by-one-error) · [Overflow](#overflow) · [Sentinel value](#sentinel-value) · [Stack overflow](#stack-overflow) · [Stream and flush](#stream-and-flush) · [Time complexity](#time-complexity) · [Undefined behavior](#undefined-behavior) · [Uninitialized variable](#uninitialized-variable)
+**Contents:** [Bounds checking](#bounds-checking) · [Buffer overflow](#buffer-overflow) · [Compile time and run time](#compile-time-and-run-time) · [Compiler warning and error](#compiler-warning-and-error) · [Convergence](#convergence) · [Declaration and definition](#declaration-and-definition) · [Default argument](#default-argument) · [Deterministic chaos and bifurcation](#deterministic-chaos-and-bifurcation) · [Exit code](#exit-code) · [Floating-point number](#floating-point-number) · [Function signature](#function-signature) · [Implicit conversion, cast, narrowing](#implicit-conversion-cast-narrowing) · [Integer division](#integer-division) · [Iteration](#iteration) · [Literal](#literal) · [Magic number](#magic-number) · [NaN and infinity](#nan-and-infinity) · [Off-by-one error](#off-by-one-error) · [Overflow](#overflow) · [Overloading](#overloading) · [Pass by value, by reference, by const reference](#pass-by-value-by-reference-by-const-reference) · [Scope](#scope) · [Sentinel value](#sentinel-value) · [Stack overflow](#stack-overflow) · [Stream and flush](#stream-and-flush) · [Time complexity](#time-complexity) · [Tolerance](#tolerance) · [Truncation (discretization) error](#truncation-discretization-error) · [Undefined behavior](#undefined-behavior) · [Uninitialized variable](#uninitialized-variable)
 
 ---
 
@@ -77,6 +77,70 @@ error: narrowing conversion of '3.7000000000000002e+0' from 'double' to 'int' [-
 
 ---
 
+## Convergence
+
+**What:** an iterative method *converges* if its repeated steps get closer and closer to the answer. How fast it does is the *rate* of convergence. With **quadratic** convergence the number of correct digits roughly **doubles** with every step. With *linear* convergence the error shrinks by a constant factor per step.
+
+**Example:** Newton's method for the square root of 2 (handout 3). The error after each step:
+
+```text
+step 0: 5.86e-01
+step 1: 8.58e-02
+step 2: 2.45e-03
+step 3: 2.12e-06
+step 4: 1.59e-12
+step 5: 2.22e-16     (the limit of a double)
+```
+
+**Why it matters:** the rate tells you how many steps to expect. A method that does not converge never reaches the answer, so every iteration needs a stop rule: a [tolerance](#tolerance) and a maximum number of steps (`max_iterations`).
+
+**See also:** [Iteration](#iteration), [Tolerance](#tolerance). Used in [Handout 3, section 6.3](../handouts/03-functions.md) and [`newton_sqrt.cpp`](../examples/03-functions/newton_sqrt.cpp).
+
+---
+
+## Declaration and definition
+
+**What:** a *declaration* tells the compiler that a name exists and what type or signature it has. A *definition* supplies the actual thing: the function body, or the memory of the variable. A function may be declared several times but defined only once. `int n = 5;` is a declaration and a definition in one.
+
+**Example:**
+
+```cpp
+double mean(double a, double b);   // declaration (prototype): ends with ;
+
+double mean(double a, double b)    // definition: has a body
+{
+    return (a + b) / 2.0;
+}
+```
+
+**Why it matters:** C++ reads the file from top to bottom, so a function must be declared **before** it is used. Otherwise the error is `'mean' was not declared in this scope`. If a function is declared and used but never defined, the program compiles and the **linker** reports "undefined reference".
+
+**See also:** [Function signature](#function-signature), [Compile time and run time](#compile-time-and-run-time). Used in [Handout 3, section 1.1](../handouts/03-functions.md) and [`tour.cpp`](../examples/03-functions/tour.cpp).
+
+---
+
+## Default argument
+
+**What:** a value given in the function's parameter list that is used when the caller leaves that argument out.
+
+**Example:**
+
+```cpp
+double to_micro(double value, double factor = 1.0e6)
+{
+    return value * factor;
+}
+
+to_micro(0.25)           // 250000   (factor = 1.0e6)
+to_micro(0.25, 1000.0)   // 250      (factor given)
+```
+
+**Why it matters:** it shortens calls for the usual case, such as a standard temperature or a tolerance. Default values must be the **last** parameters. Write the default in the declaration only, not again in the definition. Too many defaults make calls hard to read.
+
+**See also:** [Overloading](#overloading), [Tolerance](#tolerance). Used in [Handout 3, section 1.3](../handouts/03-functions.md) and [`ideal_gas.cpp`](../examples/03-functions/ideal_gas.cpp).
+
+---
+
 ## Deterministic chaos and bifurcation
 
 **What:** *Deterministic* means a fixed rule without any randomness. *Chaos* means that, despite this, the long-run behavior looks irregular and depends very sensitively on the starting values. A *bifurcation* is a parameter value at which the long-run behavior changes qualitatively, for example from one settled value to a two-value cycle.
@@ -125,6 +189,23 @@ Many decimal fractions, such as 0.1, have no exact binary representation, just a
 
 ---
 
+## Function signature
+
+**What:** the first line of a function: its return type, name and parameter list. It is everything a caller needs to know to use the function.
+
+**Example:**
+
+```cpp
+double michaelis_menten(double vmax, double km, double substrate)
+//  ^ return type   ^ name       ^ parameters
+```
+
+**Why it matters:** the compiler checks every call against the signature (number and types of the arguments). For [overloading](#overloading) only the name and the parameter types count: two functions cannot differ in the return type alone.
+
+**See also:** [Declaration and definition](#declaration-and-definition), [Overloading](#overloading). Used in [Handout 3, section 1.1](../handouts/03-functions.md).
+
+---
+
 ## Implicit conversion, cast, narrowing
 
 **What:** C++ converts between number types automatically when it needs to (*implicit conversion*). A *cast* is a conversion that you request explicitly, with `static_cast<type>(value)`. *Narrowing* is a conversion that may lose information, such as `double` to `int`.
@@ -160,6 +241,18 @@ double d = static_cast<double>(7) / 2;  // 3.5: explicit and visible
 **Why it matters:** the compiler does not complain, because the program is legal. A mean or a fraction computed with integers is quietly wrong. Convert one operand first: `static_cast<double>(total) / n`, or multiply by `1.0`. The order of operations matters too: `3 / 4 * 100` is `0`, while `100.0 * 3 / 4` is `75`.
 
 **See also:** [Implicit conversion, cast, narrowing](#implicit-conversion-cast-narrowing). Used in [Handout 2, section 1.2](../handouts/02-basics.md) and [`division_demo.cpp`](../examples/02-basics/division_demo.cpp).
+
+---
+
+## Iteration
+
+**What:** one round of a repeated process. A loop runs through *iterations*, and an *iterative method* improves an estimate in each of them until it is good enough.
+
+**Example:** every pass of a `for` loop is one iteration. In Newton's method each call of `newton_step` is one iteration, and the method stops when the change is smaller than the [tolerance](#tolerance) or after `max_iterations`.
+
+**Why it matters:** counting iterations measures the work and shows the [convergence](#convergence). A loop whose condition never becomes false iterates forever, so give iterative methods a maximum number of iterations.
+
+**See also:** [Convergence](#convergence), [Tolerance](#tolerance). Used in [Handout 2, section 1.4](../handouts/02-basics.md) and [Handout 3, section 6.3](../handouts/03-functions.md).
 
 ---
 
@@ -268,6 +361,65 @@ For ordinary (signed) integers the C++ standard does **not** define the result. 
 
 ---
 
+## Overloading
+
+**What:** several functions with the **same name** but different parameter lists. The compiler chooses the one that fits the arguments of the call.
+
+**Example:**
+
+```cpp
+double mean(double a, double b);            // two values
+double mean(double a, double b, double c);  // three values
+
+mean(4.0, 7.0)         // 5.5
+mean(4.0, 7.0, 10.0)   // 7
+```
+
+**Why it matters:** it keeps names simple when the same operation works on different inputs. Use it only when the functions really do the same thing. Overloads that behave differently under one name confuse the reader.
+
+**See also:** [Function signature](#function-signature), [Default argument](#default-argument). Used in [Handout 3, section 1.3](../handouts/03-functions.md).
+
+---
+
+## Pass by value, by reference, by const reference
+
+**What:** three ways to give an argument to a function.
+
+| Way | Parameter | What happens |
+|---|---|---|
+| by value | `int n` | the function gets a **copy**. The caller's variable cannot change. |
+| by reference | `int& n` | the function works on the **original**. Changes are visible to the caller. |
+| by `const` reference | `const std::string& s` | no copy, and the function may **not** change it |
+
+**Example:**
+
+```cpp
+void increment_copy(int n) { ++n; }
+void increment(int& n)     { ++n; }
+
+int counter = 10;
+increment_copy(counter);   // counter is still 10
+increment(counter);        // counter is now 11
+```
+
+**Why it matters:** the difference is invisible at the call site, and a function that works on a copy "does nothing" without any error message. Rule of thumb: small values by value, big values that are only read by `const` reference, and a variable that must change by reference.
+
+**See also:** [Scope](#scope). Used in [Handout 3, section 1.2](../handouts/03-functions.md) and [`swap_demo.cpp`](../examples/03-functions/swap_demo.cpp).
+
+---
+
+## Scope
+
+**What:** the part of the program in which a name is visible. A variable declared inside a function (or inside any `{ }`) exists only there, and disappears at the closing brace.
+
+**Example:** a function cannot see the variables of `main`. If it needs a value, the value must come in as a parameter. Two functions can each have their own variable `x` without interfering. A `const` declared outside every function is visible in the whole file.
+
+**Why it matters:** local variables keep functions independent and easy to test. If an inner variable has the same name as an outer one, the inner one *hides* the outer one, which can cause confusing bugs. Avoid file-level variables that change.
+
+**See also:** [Pass by value, by reference, by const reference](#pass-by-value-by-reference-by-const-reference). Used in [Handout 3, section 1.4](../handouts/03-functions.md).
+
+---
+
 ## Sentinel value
 
 **What:** a special value of an ordinary type that is agreed to mean "nothing" or "no result". Also called a marker value.
@@ -334,6 +486,43 @@ std::cout << "result" << std::endl;  // flushes every time: slow for many lines
 **Why it matters:** with small data any method is fast. With large data, a method with lower complexity can be the difference between seconds and days. Counting operations, as the search example does, is a simple way to see it. Handout 3 compares linear search with binary search.
 
 **See:** [Handout 2, section 3](../handouts/02-basics.md). Reference: T. H. Cormen et al., *Introduction to Algorithms*, 4th ed., MIT Press, 2022.
+
+---
+
+## Tolerance
+
+**What:** how close counts as "good enough". A tolerance is used as a stop rule for an iterative method, and when two `double` values are compared. It can be *absolute* (a fixed amount, `1.0e-12`) or *relative* (a fraction of the value).
+
+**Example:**
+
+```cpp
+if (std::abs(next - x) < tolerance) { return next; }   // stop when the change is small
+```
+
+In handout 3, Newton's method with a tolerance of `1.0e-3` still returned `1.414213562375`, correct to about 1e-12. The tolerance tests the size of the **last step**, and the error after a step is much smaller than the step itself.
+
+**Why it matters:** `==` is not a reliable test for `double` values (see [Floating-point number](#floating-point-number)), so a tolerance is the usual replacement. Too loose gives poor results. Too tight (below what a `double` can resolve, about 1e-16 relative) may never be reached.
+
+**See also:** [Convergence](#convergence), [Iteration](#iteration), [Default argument](#default-argument). Used in [Handout 3, section 6.3](../handouts/03-functions.md).
+
+---
+
+## Truncation (discretization) error
+
+**What:** the error that comes from replacing an exact mathematical process (an integral, a derivative, continuous time, an infinite series) by a finite approximation. It is a property of the **method**, and differs from rounding error, which comes from the limited digits of a `double` (see [Floating-point number](#floating-point-number)).
+
+**Example:** the trapezoid rule for the area under a curve (handout 3). Doubling the number of strips divides the error by about 4:
+
+```text
+     n          area       error     ratio
+     1     52.489353   2.082e+01         -
+     8     32.044074   3.703e-01      3.97
+  1024     31.673787   2.265e-05      4.00
+```
+
+**Why it matters:** a smaller step (more strips, shorter time step) reduces this error, but costs more work, and at some point rounding errors take over. Knowing how the error shrinks with the step, here as 1/n², tells you how fine a step you need. Test the method against a case with a known exact answer.
+
+**See also:** [Convergence](#convergence), [Floating-point number](#floating-point-number). Used in [Handout 3, section 3](../handouts/03-functions.md) and [`trapezoid.cpp`](../examples/03-functions/trapezoid.cpp).
 
 ---
 
