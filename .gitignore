@@ -1,0 +1,11 @@
+build/
+.venv/
+CMakeUserPresets.json
+CMakeLists.txt.user*
+__pycache__/
+
+# Backup folder
+/backup
+
+# plan
+PLAN.md
