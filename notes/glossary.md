@@ -2,7 +2,7 @@
 
 Short explanations of terms that appear in the handouts. Entries are alphabetical. Each has a plain definition, a small example and a pointer to where the term is used. The outputs shown were produced with g++ 13.1 (MinGW).
 
-**Contents:** [Bounds checking](#bounds-checking) · [Buffer overflow](#buffer-overflow) · [Compile time and run time](#compile-time-and-run-time) · [Compiler warning and error](#compiler-warning-and-error) · [Convergence](#convergence) · [Declaration and definition](#declaration-and-definition) · [Default argument](#default-argument) · [Deterministic chaos and bifurcation](#deterministic-chaos-and-bifurcation) · [Exit code](#exit-code) · [Floating-point number](#floating-point-number) · [Function signature](#function-signature) · [Implicit conversion, cast, narrowing](#implicit-conversion-cast-narrowing) · [Integer division](#integer-division) · [Iteration](#iteration) · [Literal](#literal) · [Magic number](#magic-number) · [NaN and infinity](#nan-and-infinity) · [Off-by-one error](#off-by-one-error) · [Overflow](#overflow) · [Overloading](#overloading) · [Pass by value, by reference, by const reference](#pass-by-value-by-reference-by-const-reference) · [Scope](#scope) · [Sentinel value](#sentinel-value) · [Stack overflow](#stack-overflow) · [Stream and flush](#stream-and-flush) · [Time complexity](#time-complexity) · [Tolerance](#tolerance) · [Truncation (discretization) error](#truncation-discretization-error) · [Undefined behavior](#undefined-behavior) · [Uninitialized variable](#uninitialized-variable)
+**Contents:** [Bounds checking](#bounds-checking) · [Buffer overflow](#buffer-overflow) · [Compile time and run time](#compile-time-and-run-time) · [Compiler warning and error](#compiler-warning-and-error) · [Container](#container) · [Convergence](#convergence) · [Copy and reference](#copy-and-reference) · [Declaration and definition](#declaration-and-definition) · [Default argument](#default-argument) · [Deterministic chaos and bifurcation](#deterministic-chaos-and-bifurcation) · [Exit code](#exit-code) · [Floating-point number](#floating-point-number) · [Function signature](#function-signature) · [Implicit conversion, cast, narrowing](#implicit-conversion-cast-narrowing) · [Integer division](#integer-division) · [Iteration](#iteration) · [Literal](#literal) · [Magic number](#magic-number) · [NaN and infinity](#nan-and-infinity) · [npos](#npos) · [Off-by-one error](#off-by-one-error) · [Overflow](#overflow) · [Overloading](#overloading) · [Parallel vectors](#parallel-vectors) · [Pass by value, by reference, by const reference](#pass-by-value-by-reference-by-const-reference) · [Range-based for loop](#range-based-for-loop) · [Scope](#scope) · [Sentinel value](#sentinel-value) · [size_t and unsigned numbers](#size_t-and-unsigned-numbers) · [Stack overflow](#stack-overflow) · [Stream and flush](#stream-and-flush) · [Time complexity](#time-complexity) · [Tolerance](#tolerance) · [Truncation (discretization) error](#truncation-discretization-error) · [Undefined behavior](#undefined-behavior) · [Uninitialized variable](#uninitialized-variable) · [Vector](#vector)
 
 ---
 
@@ -77,6 +77,23 @@ error: narrowing conversion of '3.7000000000000002e+0' from 'double' to 'int' [-
 
 ---
 
+## Container
+
+**What:** an object that holds a collection of values. The standard library offers several: `std::string` (characters), `std::vector` (a growing row), and later `std::map` and `std::set`. They share a common style: they know their `size()`, can be looped over with a [range-based for loop](#range-based-for-loop), and work with the same library algorithms.
+
+**Example:**
+
+```cpp
+std::vector<double> rates = {98.2, 101.5, 99.8};   // a row of numbers
+std::string seq = "ATGGCC";                         // a row of characters
+```
+
+**Why it matters:** the choice of container decides how easy and how fast a task is. `std::vector` is the default choice, and others fit special jobs, for example a `map` for looking up values by name (handout 6). Learning one container well makes the others easy.
+
+**See also:** [Vector](#vector), [Range-based for loop](#range-based-for-loop), [Bounds checking](#bounds-checking). Used in [Handout 4](../handouts/04-vectors.md).
+
+---
+
 ## Convergence
 
 **What:** an iterative method *converges* if its repeated steps get closer and closer to the answer. How fast it does is the *rate* of convergence. With **quadratic** convergence the number of correct digits roughly **doubles** with every step. With *linear* convergence the error shrinks by a constant factor per step.
@@ -95,6 +112,27 @@ step 5: 2.22e-16     (the limit of a double)
 **Why it matters:** the rate tells you how many steps to expect. A method that does not converge never reaches the answer, so every iteration needs a stop rule: a [tolerance](#tolerance) and a maximum number of steps (`max_iterations`).
 
 **See also:** [Iteration](#iteration), [Tolerance](#tolerance). Used in [Handout 3, section 6.3](../handouts/03-functions.md) and [`newton_sqrt.cpp`](../examples/03-functions/newton_sqrt.cpp).
+
+---
+
+## Copy and reference
+
+**What:** assigning a `std::vector` or `std::string` to a new variable makes an **independent copy of all elements**. A *reference* (`&`) is just another name for the same object: no copy is made, and a change through one name is visible through the other.
+
+**Example:**
+
+```cpp
+std::vector<int> a = {1, 2, 3};
+std::vector<int> b = a;          // a copy
+b[0] = 99;                       // a[0] is still 1
+
+std::vector<int>& r = a;         // another name for a
+r[0] = 99;                       // a[0] is now 99
+```
+
+**Why it matters:** there are two surprises. If you know a language where `b = a` makes both names share one list (Python does this), C++ behaves differently: it copies. And copying a vector with millions of elements takes time, which is why big data are passed to functions by `const` reference and range-for loops over big elements use `const std::string&` and the like.
+
+**See also:** [Pass by value, by reference, by const reference](#pass-by-value-by-reference-by-const-reference), [Range-based for loop](#range-based-for-loop). Used in [Handout 4, sections 1.2 and 1.4](../handouts/04-vectors.md).
 
 ---
 
@@ -321,6 +359,25 @@ nan == nan      is false       (use std::isnan(x) to test)
 
 ---
 
+## npos
+
+**What:** the constant `std::string::npos` ("no position"). `find` returns it when the text is not found. It is the largest value of the unsigned type `size_t`, not a negative number.
+
+**Example:**
+
+```cpp
+std::string seq = "ATGGCC";
+seq.find("GCC")                        // 3
+seq.find("XYZ") == std::string::npos   // true: not found
+std::string::npos                      // 18446744073709551615 on a 64-bit system
+```
+
+**Why it matters:** `npos` is a [sentinel value](#sentinel-value) that looks like a huge but valid position. If you use the result of `find` without comparing it with `npos`, you index far outside the string. Always compare first.
+
+**See also:** [Sentinel value](#sentinel-value), [size_t and unsigned numbers](#size_t-and-unsigned-numbers). Used in [Handout 4, sections 1.5 and 5](../handouts/04-vectors.md) and [`grid.cpp`](../examples/04-vectors/grid.cpp).
+
+---
+
 ## Off-by-one error
 
 **What:** a loop or index that is wrong by exactly one, usually from `<` versus `<=`, or from counting positions from 1 instead of 0.
@@ -381,6 +438,24 @@ mean(4.0, 7.0, 10.0)   // 7
 
 ---
 
+## Parallel vectors
+
+**What:** several vectors that describe the same set of things, where entry `i` of every vector belongs together.
+
+**Example:** from the element table of handout 4:
+
+```cpp
+std::vector<std::string> symbols = {"H", "C", "N", "O", "P"};
+std::vector<double> masses = {1.008, 12.011, 14.007, 15.999, 30.974};
+// symbols[3] and masses[3] both describe oxygen
+```
+
+**Why it matters:** nothing enforces that the vectors have the same length or the same order. If you insert, delete or sort one of them, the matching silently breaks and a mass is attached to the wrong element. The remedy is **one record per item**: a `struct` (handout 6) or a class (handout 9). Parallel vectors are acceptable only for small, fixed data.
+
+**See also:** [Vector](#vector). Used in [Handout 4, section 7](../handouts/04-vectors.md) and [`element_table_v2.cpp`](../examples/04-vectors/element_table_v2.cpp).
+
+---
+
 ## Pass by value, by reference, by const reference
 
 **What:** three ways to give an argument to a function.
@@ -405,6 +480,24 @@ increment(counter);        // counter is now 11
 **Why it matters:** the difference is invisible at the call site, and a function that works on a copy "does nothing" without any error message. Rule of thumb: small values by value, big values that are only read by `const` reference, and a variable that must change by reference.
 
 **See also:** [Scope](#scope). Used in [Handout 3, section 1.2](../handouts/03-functions.md) and [`swap_demo.cpp`](../examples/03-functions/swap_demo.cpp).
+
+---
+
+## Range-based for loop
+
+**What:** a loop that visits every element of a [container](#container) in order: `for (type name : container)`. It has no index, so it cannot have an [off-by-one error](#off-by-one-error).
+
+**Example:**
+
+```cpp
+for (double t : temperatures)         // t is a copy of each element
+for (double& t : temperatures)        // t is the element itself: changes are kept
+for (const std::string& s : names)    // no copy, read only
+```
+
+**Why it matters:** a copy (no `&`) is fine for small values, but changes are lost and every round copies the element, which is slow for big ones. Never add or remove elements of the container inside the loop ([undefined behavior](#undefined-behavior)). If you need the position or the neighbors of an element, use an index loop instead.
+
+**See also:** [Copy and reference](#copy-and-reference), [Pass by value, by reference, by const reference](#pass-by-value-by-reference-by-const-reference), [Iteration](#iteration). Used in [Handout 4, section 1.2](../handouts/04-vectors.md).
 
 ---
 
@@ -435,6 +528,32 @@ if (found_at >= 0) { /* found */ }
 **Why it matters:** the marker looks like a normal value, so it must be checked. If you forget and use `-1` as an index, you read memory outside the array. Later handouts show safer ways to say "no result".
 
 **See also:** [Bounds checking](#bounds-checking), [Magic number](#magic-number). Used in [`linear_search.cpp`](../examples/02-basics/linear_search.cpp).
+
+---
+
+## size_t and unsigned numbers
+
+**What:** `std::size_t` is the unsigned integer type used by `size()`, `length()` and positions. Unsigned numbers are never negative, and when they go below 0 they **wrap around** (this is defined for unsigned types). On a 64-bit system `size_t` has 8 bytes.
+
+**Example:**
+
+```cpp
+std::vector<int> v;                 // empty
+v.size() - 1                        // 18446744073709551615, not -1
+int i = 0;
+if (i < v.size()) { /* ... */ }     // compiler warning, see below
+```
+
+The warning of g++ with `-Wall -Wextra`:
+
+```text
+warning: comparison of integer expressions of different signedness: 'int' and
+'std::vector<int>::size_type' {aka 'long long unsigned int'} [-Wsign-compare]
+```
+
+**Why it matters:** subtracting from a size can silently give a huge number. Write conditions with addition (`i + 1 < v.size()`), use a `std::size_t` index in loops, and count down with `i > 0` and `v[i - 1]`.
+
+**See also:** [Overflow](#overflow), [Off-by-one error](#off-by-one-error), [npos](#npos), [Bounds checking](#bounds-checking). Used in [Handout 4, section 1.3](../handouts/04-vectors.md).
 
 ---
 
@@ -558,3 +677,24 @@ int m = 0;                  // correct: always give a value
 **Why it matters:** the result can differ from run to run, and the compiler may or may not warn you. Give every variable a value where you declare it.
 
 **See also:** [Undefined behavior](#undefined-behavior). Used in [Handout 2, section 1.1](../handouts/02-basics.md).
+
+---
+
+## Vector
+
+**What:** `std::vector<T>` (header `<vector>`) is a row of elements of type `T` that knows its size and can grow. The elements sit next to each other in memory, so access by index is fast.
+
+**Example:**
+
+```cpp
+std::vector<double> temperatures = {36.6, 37.1, 38.4};
+temperatures.push_back(36.9);    // append at the end
+temperatures.size();             // 4
+temperatures[0];                 // 36.6, no check of the index
+temperatures.at(10);             // checked: throws std::out_of_range
+std::vector<int> zeros(5, 0);    // five elements, all 0
+```
+
+**Why it matters:** `std::vector` is the default [container](#container) and replaces C arrays in almost all code: no separate count, no fixed size, and growing is cheap on average. One exception: `std::vector<bool>` behaves differently from all other vectors, so keep yes/no flags in a `std::vector<int>` instead.
+
+**See also:** [Container](#container), [Bounds checking](#bounds-checking), [Range-based for loop](#range-based-for-loop), [size_t and unsigned numbers](#size_t-and-unsigned-numbers), [Copy and reference](#copy-and-reference). Used in [Handout 4](../handouts/04-vectors.md).

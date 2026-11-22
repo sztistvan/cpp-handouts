@@ -166,6 +166,58 @@ def trapezoid_error(exe_dir: Path) -> None:
     plt.close(fig)
 
 
+def measurements(exe_dir: Path) -> None:
+    lines = run(exe_dir / "statistics.exe").splitlines()
+    values = [float(v) for v in lines[0].split(":")[1].split()]
+    m = re.search(r"mean = ([\d.]+).*median = ([\d.]+)", lines[1])
+    mean_all, median_all = float(m.group(1)), float(m.group(2))
+
+    fig, ax = plt.subplots(figsize=(6, 3.4))
+    xs = list(range(1, len(values) + 1))
+    colors = [ORANGE if v > 110 else BLUE for v in values]
+    ax.scatter(xs, values, c=colors, s=45, zorder=3)
+    ax.axhline(mean_all, color=ORANGE, linestyle="--", linewidth=1.3, label=f"mean = {mean_all:.2f}")
+    ax.axhline(median_all, color=BLUE, linestyle="-", linewidth=1.3, label=f"median = {median_all:.2f}")
+    ax.annotate("outlier", (xs[-1], values[-1]), xytext=(xs[-1] - 1.8, values[-1] - 3.5), color=ORANGE,
+                arrowprops={"arrowstyle": "->", "color": ORANGE})
+    ax.set_xlabel("replicate")
+    ax.set_ylabel("rate (umol/min)")
+    ax.set_title("One outlier pulls the mean, not the median")
+    ax.set_xticks(xs)
+    ax.legend(frameon=False, loc="upper left")
+    fig.savefig(OUT / "04_measurements.png")
+    plt.close(fig)
+
+
+def logistic_growth_rate(exe_dir: Path) -> None:
+    text = run(exe_dir / "logistic_v3.exe")
+    gens, pops, growth = [], [], []
+    for line in text.splitlines():
+        parts = line.split()
+        if len(parts) == 3 and parts[0].isdigit():
+            gens.append(int(parts[0]))
+            pops.append(float(parts[1]))
+            growth.append(None if parts[2] == "-" else float(parts[2]))
+    valid = [(g, v) for g, v in zip(gens, growth) if v is not None]
+    fastest_gen = max(valid, key=lambda gv: gv[1])[0]
+
+    fig, (top, bottom) = plt.subplots(2, 1, figsize=(6, 5), sharex=True, gridspec_kw={"height_ratios": [3, 2]})
+    top.plot(gens, pops, marker="o", markersize=3.5, color=BLUE)
+    top.axhline(1000, color=GREY, linestyle="--", linewidth=1)
+    top.axhline(500, color=GREY, linestyle=":", linewidth=1)
+    top.text(0.3, 515, "K/2 = 500", color=GREY, fontsize=9)
+    top.set_ylabel("population N")
+    top.set_title("Growth is fastest when the population is about K/2")
+
+    bar_colors = [ORANGE if g == fastest_gen else BLUE for g, _ in valid]
+    bottom.bar([g for g, _ in valid], [v for _, v in valid], color=bar_colors)
+    bottom.set_xlabel("generation t")
+    bottom.set_ylabel("growth to t + 1")
+    fig.tight_layout()
+    fig.savefig(OUT / "04_logistic_growth_rate.png")
+    plt.close(fig)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--build-dir", default="build/mingw-debug",
@@ -178,6 +230,8 @@ def main() -> None:
     logistic_bifurcation(examples / "02-basics")
     michaelis_menten(examples / "03-functions")
     trapezoid_error(examples / "03-functions")
+    measurements(examples / "04-vectors")
+    logistic_growth_rate(examples / "04-vectors")
     print("Figures written to", OUT)
 
 
