@@ -243,6 +243,79 @@ def logistic_from_csv(exe_dir: Path, build_dir: Path) -> None:
     plt.close(fig)
 
 
+def bfs_distance(exe_dir: Path) -> None:
+    import numpy as np
+
+    lines = run(exe_dir / "maze_bfs.exe").splitlines()
+    path_start = lines.index("Path:")
+    path_rows = lines[path_start + 1:path_start + 8]  # the 7 maze rows with '*' on the path
+    table_start = next(i for i, line in enumerate(lines) if line.startswith("Distance table"))
+    grid = []
+    for line in lines[table_start + 1:]:
+        cells = [line[i:i + 3] for i in range(0, len(line), 3)]
+        grid.append([np.nan if c == "###" else float(c) for c in cells])
+    arr = np.array(grid)
+
+    cmap = plt.get_cmap("viridis").copy()
+    cmap.set_bad("#4d4d4d")
+    fig, ax = plt.subplots(figsize=(7, 3.6))
+    ax.imshow(arr, cmap=cmap)
+    for r in range(arr.shape[0]):
+        for c in range(arr.shape[1]):
+            if not np.isnan(arr[r, c]):
+                ax.text(c, r, f"{int(arr[r, c])}", ha="center", va="center", fontsize=8,
+                        color="white" if arr[r, c] < 9 else "black")
+            if path_rows[r][c] in "*SG":
+                ax.add_patch(plt.Rectangle((c - 0.5, r - 0.5), 1, 1, fill=False, edgecolor=ORANGE, linewidth=2))
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.grid(False)
+    for side in ax.spines.values():
+        side.set_visible(False)
+    ax.set_title("Breadth-first search: steps from S (orange frame: one shortest path)")
+    fig.savefig(OUT / "06_bfs_distance.png")
+    plt.close(fig)
+
+
+def terrain_paths(exe_dir: Path) -> None:
+    import numpy as np
+
+    lines = run(exe_dir / "terrain_dijkstra.exe").splitlines()
+    terrain = [line for line in (ROOT / "data" / "terrain.txt").read_text().splitlines() if line]
+    arr = np.array([[np.nan if ch == "#" else (float(ch) if ch.isdigit() else 1.0) for ch in row] for row in terrain])
+
+    panels = []
+    for mark in ("*", "+"):
+        title_index = next(i for i, line in enumerate(lines) if re.match(r".*: \d+ steps, cost \d+", line)
+                           and any(mark in row for row in lines[i + 1:i + 1 + len(terrain)]))
+        m = re.match(r"(.*): (\d+) steps, cost (\d+)", lines[title_index])
+        rows = lines[title_index + 1:title_index + 1 + len(terrain)]
+        panels.append((m.group(1), int(m.group(2)), int(m.group(3)), rows, mark))
+
+    cmap = plt.get_cmap("YlOrBr").copy()
+    cmap.set_bad("#4d4d4d")
+    fig, axes = plt.subplots(2, 1, figsize=(7, 4.6))
+    for ax, (name, steps, cost, rows, mark) in zip(axes, panels):
+        ax.imshow(arr, cmap=cmap, vmin=0, vmax=10)
+        for r in range(arr.shape[0]):
+            for c in range(arr.shape[1]):
+                if not np.isnan(arr[r, c]):
+                    ax.text(c, r, f"{int(arr[r, c])}", ha="center", va="center", fontsize=8,
+                            color="white" if arr[r, c] >= 6 else "black")
+                if rows[r][c] in mark + "SG":
+                    ax.add_patch(plt.Rectangle((c - 0.5, r - 0.5), 1, 1, fill=False,
+                                               edgecolor=BLUE if mark == "*" else "#009e73", linewidth=2.2))
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.grid(False)
+        for side in ax.spines.values():
+            side.set_visible(False)
+        ax.set_title(f"{name}: {steps} steps, cost {cost}", fontsize=10)
+    fig.tight_layout()
+    fig.savefig(OUT / "06_terrain_paths.png")
+    plt.close(fig)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--build-dir", default="build/mingw-debug",
@@ -258,6 +331,8 @@ def main() -> None:
     measurements(examples / "04-vectors")
     logistic_growth_rate(examples / "04-vectors")
     logistic_from_csv(examples / "05-files", ROOT / args.build_dir)
+    bfs_distance(examples / "06-containers")
+    terrain_paths(examples / "06-containers")
     print("Figures written to", OUT)
 
 
